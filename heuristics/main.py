@@ -7,6 +7,7 @@ from pathlib import Path
 from input_parser import DATParser
 from local_search import LocalSearch
 from greedy import Greedy
+from grasp import GRASP
 from utils import Input
 
 logger = logging.getLogger(__name__)
@@ -37,13 +38,35 @@ if __name__ == '__main__':
 
     start_time = time.time()
 
-    greedy = Greedy()
+    if config.solver == 'Greedy':
 
-    greedy_solution = greedy.solve(data)
+        greedy = Greedy(data)
+        solution = greedy.solve()
 
-    end_time = time.time()
-    logger.info("Elapsed time: %s", end_time - start_time)
+    elif config.solver == 'GRASP':
 
-    if config.localSearch:
-        local_search = LocalSearch()
-        solution = local_search.solve(initial_solution=greedy_solution)
+        grasp = GRASP(data)
+        solution = grasp.solve()
+
+        greedy = Greedy(data)
+        solution = greedy.solve()
+
+    logger.info("[%s] Elapsed time: %s seconds", config.solver, time.time() - start_time)
+    logger.info('[%s] Solution: %s', config.solver, solution)
+
+    rejected_orders = False in solution.taken_orders
+
+    if rejected_orders and config.localSearch:
+
+        logger.info("[Local Search] Attempting to improve the solution")
+
+        local_search = LocalSearch(data)
+
+        solution = local_search.solve(
+            initial_solution=solution,
+            end_time=start_time + config.maxExecTime
+        )
+
+        logger.info("[Local Search] Elapsed time: %s seconds", time.time() - start_time)
+
+        logger.info('[Local Search] Solution: %s', solution)

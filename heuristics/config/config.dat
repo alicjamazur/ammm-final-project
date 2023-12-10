@@ -1,9 +1,8 @@
 # --- Common specific parameters ------------------------------------------------------------------------------
-inputDataFile        = data/project.6.dat;        # Input DAT file
+inputDataFile        = data/project.5.dat;        # Input DAT file
 solutionFile         = Heuristics/solutions/m.sol;   # Output DAT file (solution)
 solver               = Greedy;                  # Supported solvers: Greedy / GRASP
 maxExecTime          = 60;                      # Maximum execution time in seconds
-verbose              = True;                    # Verbose mode?
 
 
 # --- Local Search specific parameters ------------------------------------------------------------------------

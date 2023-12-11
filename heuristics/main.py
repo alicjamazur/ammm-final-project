@@ -40,19 +40,16 @@ if __name__ == '__main__':
 
     if config.solver == 'Greedy':
 
-        greedy = Greedy(data)
+        greedy = Greedy(data, config)
         solution = greedy.solve()
 
     elif config.solver == 'GRASP':
 
-        grasp = GRASP(data)
+        grasp = GRASP(data, config)
         solution = grasp.solve()
 
-        greedy = Greedy(data)
-        solution = greedy.solve()
-
     logger.info("[%s] Elapsed time: %s seconds", config.solver, time.time() - start_time)
-    logger.info('[%s] Solution: %s', config.solver, solution)
+    logger.info('[%s] Optimal profit: %s', config.solver, solution.profit)
 
     rejected_orders = False in solution.taken_orders
 
@@ -60,13 +57,12 @@ if __name__ == '__main__':
 
         logger.info("[Local Search] Attempting to improve the solution")
 
-        local_search = LocalSearch(data)
+        local_search = LocalSearch(data, config)
 
         solution = local_search.solve(
             initial_solution=solution,
-            end_time=start_time + config.maxExecTime
         )
 
         logger.info("[Local Search] Elapsed time: %s seconds", time.time() - start_time)
 
-        logger.info('[Local Search] Solution: %s', solution)
+        logger.info('[Local Search] Optimal profit: %s', solution.profit)

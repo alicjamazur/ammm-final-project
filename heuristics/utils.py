@@ -2,6 +2,8 @@ from typing import List
 import sys
 import logging
 from dataclasses import dataclass
+from input_parser import DATParser
+import time
 
 OrderSchedule = List[bool]
 
@@ -55,10 +57,19 @@ class Input:
 
 
 @dataclass
+class Candidate:
+    schedule: List[int]
+    q: int
+
+
+@dataclass
 class BaseSolver:
 
     input_data: Input
+    config: DATParser
 
+    def get_elapsed_time(self, start_time: float) -> float:
+        return time.time() - start_time
     def get_orders(self):
 
         orders = []
@@ -81,8 +92,6 @@ class BaseSolver:
         solution.profit += order.profit
         solution.taken_orders[order.id] = True
         solution.schedule[order.id] = schedule
-
-        assert len(schedule) == 5
 
         for i in range(self.input_data.t):
             if schedule[i]:
@@ -137,3 +146,4 @@ class BaseSolver:
                     candidates.append(order_schedule)
 
         return candidates
+

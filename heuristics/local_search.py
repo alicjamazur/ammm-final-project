@@ -80,7 +80,7 @@ class LocalSearch(BaseSolver):
 
         return best_neighbor_solution
 
-    def solve(self, initial_solution: Solution, end_time: float) -> Solution:
+    def solve(self, initial_solution: Solution, start_time: float) -> Solution:
 
         best_solution = initial_solution
         highest_profit = initial_solution.profit
@@ -88,14 +88,16 @@ class LocalSearch(BaseSolver):
         orders = self.get_orders()
 
         while (False in best_solution.taken_orders) \
-                and time.time() < end_time:
+                and self.get_elapsed_time(start_time) < self.config.maxExecTime:
 
             neighbor = self.explore_neighborhood(best_solution, orders)
 
             if neighbor is None:
+                logger.info("[Local Search] No neighbors found")
                 break;
 
             elif neighbor.profit < highest_profit:
+                logger.info("[Local Search] Neighbor found but the solution is not improved")
                 break;
 
             highest_profit = neighbor.profit

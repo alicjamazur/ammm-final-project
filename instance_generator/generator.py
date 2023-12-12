@@ -17,6 +17,7 @@ class InstanceGenerator:
         num_instances = self.config.numInstances
 
         numOrders = self.config.numOrders
+        numSlots = self.config.numSlots
 
         minOrderProfit = self.config.minOrderProfit
         maxOrderProfit = self.config.maxOrderProfit
@@ -27,10 +28,8 @@ class InstanceGenerator:
         minOrderSurface = self.config.minOrderSurface
         maxOrderSurface = self.config.maxOrderSurface
 
-        minMinOrderDeliver = self.config.minMinOrderDeliver
-        maxMaxOrderDeliver = self.config.maxMaxOrderDeliver
-
-        numSlots = self.config.numSlots
+        minMinOrderDeliver = minOrderLength
+        maxMaxOrderDeliver = numSlots
 
         minSurfaceCapacity = self.config.minSurfaceCapacity
         maxSurfaceCapacity = self.config.maxSurfaceCapacity

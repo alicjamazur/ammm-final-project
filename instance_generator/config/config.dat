@@ -1,0 +1,23 @@
+# file name: ../AMMMLabHeuristics/data/instance_XX.dat
+instancesDirectory = output;
+fileNamePrefix = project;
+fileNameExtension = dat;
+numInstances = 2;
+
+numOrders = 20;
+minOrderProfit = 1;
+maxOrderProfit = 10;
+
+minOrderLength = 1;
+maxOrderLength = 5;
+
+minMinOrderDeliver = 1;
+maxMaxOrderDeliver = 24;
+
+minOrderSurface = 1;
+maxOrderSurface = 5;
+
+numSlots = 24;
+
+minSurfaceCapacity = 10;
+maxSurfaceCapacity = 30;

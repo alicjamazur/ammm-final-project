@@ -3,34 +3,11 @@ from utils.AMMMGlobals import AMMMException
 from dataclasses import dataclass
 from utils.input_parser import DATParser
 
+
 @dataclass
 class InstanceGenerator:
-    # Generate instances based on read configuration.
 
     config: DATParser
-    # def __init__(self, config):
-    #     self.config = config
-
-    numOrders = 20;
-    minOrderProfit = 1;
-    maxOrderProfit = 20;
-
-    numSlots = 24;
-
-    minOrderLength = 1;
-    maxOrderLength = 10;
-
-    minMinOrderDeliver = 1;
-    maxMinOrderDeliver = 24;
-
-    minMaxOrderDeliver = 1;
-    maxMaxOrderDeliver = 24;
-
-    minOrderSurface = 1;
-    maxOrderSurface = 30;
-
-    minSurfaceCapacity = 10;
-    maxSurfaceCapacity = 30;
 
     def generate(self):
 

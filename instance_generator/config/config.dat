@@ -1,11 +1,11 @@
 # file name: ../AMMMLabHeuristics/data/instance_XX.dat
 instancesDirectory = output;
-fileNamePrefix = m_tuning;
+fileNamePrefix = xxl;
 fileNameExtension = dat;
-numInstances = 2;
+numInstances = 3;
 
-numOrders = 10;
-numSlots = 24;
+numOrders = 40;
+numSlots = 50;
 
 minOrderProfit = 1;
 maxOrderProfit = 10;
@@ -16,5 +16,5 @@ maxOrderLength = 5;
 minOrderSurface = 1;
 maxOrderSurface = 5;
 
-minSurfaceCapacity = 10;
-maxSurfaceCapacity = 15;
+minSurfaceCapacity = 20;
+maxSurfaceCapacity = 22;

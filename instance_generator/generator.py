@@ -28,9 +28,6 @@ class InstanceGenerator:
         minOrderSurface = self.config.minOrderSurface
         maxOrderSurface = self.config.maxOrderSurface
 
-        minMinOrderDeliver = minOrderLength
-        maxMaxOrderDeliver = numSlots
-
         minSurfaceCapacity = self.config.minSurfaceCapacity
         maxSurfaceCapacity = self.config.maxSurfaceCapacity
 
@@ -53,8 +50,12 @@ class InstanceGenerator:
                 length[o] = random.randint(minOrderLength, maxOrderLength)
                 surface[o] = random.randint(minOrderSurface, maxOrderSurface)
 
-                max_deliver[o] = random.randint(length[o], maxMaxOrderDeliver)
-                min_deliver[o] = random.randint(minMinOrderDeliver, max_deliver[o])
+                max_deliver[o] = random.randint(length[o], numSlots)
+
+                # we assume that customer have a max 5-time-slot length availability window
+                max_availability_window = 5
+                min_slot = max(length[o], max_deliver[o] - max_availability_window)
+                min_deliver[o] = random.randint(min_slot, max_deliver[o])
 
                 assert min_deliver[o] <= max_deliver[o]
                 assert max_deliver[o] >= length[o]

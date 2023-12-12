@@ -1,0 +1,8 @@
+n=8;
+t=10;
+profit=[6 3 3 7 7 9 10 3];
+length=[2 2 3 1 5 4 2 2];
+min_deliver=[6 2 8 1 7 7 2 2];
+max_deliver=[6 4 10 3 7 7 4 6];
+surface=[5 2 2 5 5 2 4 3];
+surface_capacity=9;

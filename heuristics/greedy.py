@@ -2,7 +2,7 @@ from typing import List
 from utils import Solution
 from utils import get_logger
 from utils import TimeSlotCapacity
-from utils import OrderSchedule
+from utils import Candidate
 from utils import BaseSolver
 
 logger = get_logger(__name__)
@@ -10,12 +10,10 @@ logger = get_logger(__name__)
 
 class Greedy(BaseSolver):
 
-    def get_best_candidate(self, candidates: List[OrderSchedule]) -> OrderSchedule:
+    def get_best_candidate(self, candidates: List[Candidate]) -> Candidate:
 
-        start_slot_idx = [schedule.index(True) for schedule in candidates]
-        best_idx = start_slot_idx.index(min(start_slot_idx))
-
-        return candidates[best_idx]
+        candidates_sorted = sorted(candidates, key=lambda x: x.cost)
+        return candidates_sorted[0]
 
     def solve(self) -> Solution:
 
@@ -36,16 +34,19 @@ class Greedy(BaseSolver):
 
         for order in sorted_orders:
 
-            candidates = self.get_candidates(order, partial_solution)
+            schedules = self.get_feasible_schedules(order, partial_solution)
+
+            candidates = self.evaluate_schedules(order, schedules, partial_solution)
 
             logger.debug("Order index: %s, candidates: %s", order.id, candidates)
 
             if candidates:
-                schedule = self.get_best_candidate(candidates)
 
-                logger.debug("Order index: %s, schedule: %s", order.id, schedule)
+                candidate = self.get_best_candidate(candidates)
 
-                partial_solution = self.add_order_schedule(order, schedule, partial_solution)
+                logger.debug("Order index: %s, schedule: %s", order.id, candidate.schedule)
+
+                partial_solution = self.add_schedule(order, candidate.schedule, partial_solution)
 
         solution = partial_solution
 

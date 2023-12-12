@@ -1,6 +1,4 @@
-import sys
 import time
-import logging
 from argparse import ArgumentParser
 from pathlib import Path
 
@@ -9,11 +7,10 @@ from local_search import LocalSearch
 from greedy import Greedy
 from grasp import GRASP
 from utils import Input
+from utils import get_logger
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-handler = logging.StreamHandler(sys.stdout)
-logger.addHandler(handler)
+
+logger = get_logger(__name__)
 
 
 if __name__ == '__main__':
@@ -48,21 +45,23 @@ if __name__ == '__main__':
         grasp = GRASP(data, config)
         solution = grasp.solve()
 
-    logger.info("[%s] Elapsed time: %s seconds", config.solver, time.time() - start_time)
-    logger.info('[%s] Optimal profit: %s', config.solver, solution.profit)
-
     rejected_orders = False in solution.taken_orders
 
-    if rejected_orders and config.localSearch:
-
-        logger.info("[Local Search] Attempting to improve the solution")
+    if rejected_orders \
+            and config.solver == 'Greedy' \
+            and config.localSearch:
 
         local_search = LocalSearch(data, config)
 
         solution = local_search.solve(
             initial_solution=solution,
+            start_time=start_time
         )
 
-        logger.info("[Local Search] Elapsed time: %s seconds", time.time() - start_time)
+    logger.debug("Orders taken: %s", solution.taken_orders)
+    logger.debug("Orders' schedule: %s", solution.schedule)
 
-        logger.info('[Local Search] Optimal profit: %s', solution.profit)
+    logger.info("[%s] Maximum profit to gain: %s", __name__, sum(data.profit))
+    logger.info('[%s] Optimal profit found: %s', __name__, solution.profit)
+
+    logger.info("[%s] Elapsed time: %s seconds", __name__, time.time() - start_time)

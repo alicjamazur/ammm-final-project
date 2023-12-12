@@ -14,33 +14,24 @@ logger = get_logger(__name__)
 
 class GRASP(BaseSolver):
 
-    def get_randomized_candidate(self, schedules: List[OrderSchedule], alpha: float) -> List[Candidate]:
+    name: str = 'GRASP'
 
-        candidates = []
+    def get_randomized_candidate(self, candidates: List[Candidate], alpha: float) -> Candidate:
 
-        for schedule in schedules:
+        sorted_candidates = sorted(candidates, key=lambda x: x.cost)
 
-            start_slot_idx = schedule.index(True)
+        logger.debug("[%s] Candidates: %s", self.name, sorted_candidates)
 
-            candidate = Candidate(
-                schedule=schedule,
-                q=start_slot_idx
-            )
-
-            candidates.append(candidate)
-
-        sorted_candidates = sorted(candidates, key=lambda x: x.q)
-
-        logger.debug("[%s] Candidates: %s", self.config.solver, sorted_candidates)
-
-        q_min = sorted_candidates[0].q
-        q_max = sorted_candidates[-1].q
+        q_min = sorted_candidates[0].cost
+        q_max = sorted_candidates[-1].cost
 
         q_threshold = q_min + (q_max - q_min) * alpha
 
+        logger.debug("q_min: %s, q_max: %s, q_threshold: %s", q_min, q_max, q_threshold)
+
         max_index = 0
         for candidate in sorted_candidates:
-            if candidate.q <= q_threshold:
+            if candidate.cost <= q_threshold:
                 max_index += 1
 
         rcl = sorted_candidates[0:max_index]
@@ -50,7 +41,7 @@ class GRASP(BaseSolver):
 
         selection = random.choice(rcl)
 
-        logger.debug("\t alpha: %s, q_min: %s, q_max: %s, q_threshold: %s, rcl: %s, selection: %s", alpha, q_min, q_max, q_threshold, rcl, selection.q)
+        logger.debug("\t alpha: %s, rcl: %s, selection: %s", alpha, rcl, selection.cost)
 
         return selection.schedule
 
@@ -73,9 +64,11 @@ class GRASP(BaseSolver):
 
         for order in sorted_orders:
 
-            candidates = self.get_candidates(order, partial_solution)
+            schedules = self.get_feasible_schedules(order, partial_solution)
 
-            logger.debug("Order index: %s, candidates: %s", order.id, candidates)
+            candidates = self.evaluate_schedules(order, schedules, partial_solution)
+
+            logger.debug("Order index: %s, candidates: %s", order.id, schedules)
 
             if candidates:
 
@@ -83,11 +76,14 @@ class GRASP(BaseSolver):
 
                 logger.debug("Order index: %s, schedule: %s", order.id, schedule)
 
-                partial_solution = self.add_order_schedule(order, schedule, partial_solution)
+                partial_solution = self.add_schedule(order, schedule, partial_solution)
 
         solution = partial_solution
 
+        rejected_orders = sum(not v for v in solution.taken_orders)
+
         logger.info("\t [Randomized Greedy] Best profit: %s", solution.profit)
+        logger.info("\t [Randomized Greedy] Rejected orders: %s", rejected_orders)
 
         return solution
 
@@ -97,19 +93,28 @@ class GRASP(BaseSolver):
         start_time = time.time()
         rejected_orders = True
 
+        best_solution = None
+
         while rejected_orders and \
                 self.get_elapsed_time(start_time) < self.config.maxExecTime:
 
             iteration += 1
-            logger.info("[GRASP] Iteration %s", iteration)
+            logger.info("[%s] Iteration %s", self.name, iteration)
 
             alpha = 0 if iteration == 1 else self.config.alpha
 
-            solution = self.solve_randomized_greedy(alpha)
+            base_solution = self.solve_randomized_greedy(alpha)
 
-            best_solution = solution
+            if alpha == 0:
+                greedy_solution = base_solution
 
-            rejected_orders = False in solution.taken_orders
+            rejected_orders = False in base_solution.taken_orders
+
+            if best_solution is None:
+                best_solution = base_solution
+
+            elif base_solution.profit > best_solution.profit:
+                best_solution = base_solution
 
             if rejected_orders and self.config.localSearch:
 
@@ -117,17 +122,20 @@ class GRASP(BaseSolver):
 
                 local_search = LocalSearch(self.input_data, self.config)
 
-                solution = local_search.solve(
-                    initial_solution=solution,
+                ls_solution = local_search.solve(
+                    initial_solution=best_solution,
                     start_time=start_time
                 )
 
-                rejected_orders = False in solution.taken_orders
+                rejected_orders = False in ls_solution.taken_orders
 
                 logger.debug("\t [Local Search] Elapsed time: %s seconds", time.time() - start_time)
-                logger.info('\t [Local Search] Best profit: %s', solution.profit)
+                logger.info('\t [Local Search] Best profit: %s', ls_solution.profit)
 
-            if solution.profit > best_solution.profit:
-                best_solution = solution
+                if ls_solution.profit > best_solution.profit:
+                    best_solution = ls_solution
+
+        logger.info("[Greedy] Objective: %s", greedy_solution.profit)
+        logger.info("[%s] Best objective after %s iterations: %s", self.name, iteration, best_solution.profit)
 
         return best_solution

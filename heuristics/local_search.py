@@ -1,18 +1,17 @@
 import copy
-import sys
-import time
-import logging
 from typing import Optional
 from utils import Solution
 from utils import BaseSolver
 from utils import Order
 from utils import get_logger
-
+import time
 
 logger = get_logger(__name__)
 
 
 class LocalSearch(BaseSolver):
+
+    name: str = 'Local Search'
 
     def explore_neighborhood(self, solution: Solution, orders: Order) -> Optional[Solution]:
 
@@ -26,7 +25,7 @@ class LocalSearch(BaseSolver):
 
             order_r = orders[idx_r]
 
-            logger.info("* Attempting to schedule rejected order %s", order_r.id)
+            logger.info("\t [%s] Attempting to schedule rejected order %s", self.name, order_r.id)
 
             for idx_a in accepted_orders_idx:
 
@@ -36,32 +35,32 @@ class LocalSearch(BaseSolver):
 
                 new_solution = self.remove_order_schedule(order_a, new_solution)
 
-                logger.info("\t * Removed schedule for order %s", order_a.id)
+                logger.debug("\t * Removed schedule for order %s", order_a.id)
 
-                neighbors_r = self.get_candidates(order_r, new_solution)
+                neighbors_r = self.get_feasible_schedules(order_r, new_solution)
 
                 if not neighbors_r:
-                    logger.info("\t\t Unable to schedule rejected order")
+                    logger.debug("\t\t Unable to schedule rejected order")
 
                 else:
 
                     for i, neighbor_r in enumerate(neighbors_r):
 
-                        new_solution_r = self.add_order_schedule(order_r, neighbor_r, new_solution)
-                        logger.info("\t\t * Scheduled rejected order %s (candidate %s)", order_r.id, i+1)
+                        new_solution_r = self.add_schedule(order_r, neighbor_r, new_solution)
+                        logger.debug("\t\t Scheduled rejected order %s (candidate %s)", order_r.id, i+1)
 
                         if new_solution_r.profit > best_profit:
-                            logger.info("\t\t\t Improved solution from %s to %s", best_profit, new_solution_r.profit)
+                            logger.info("\t\t\t [%s] Improved solution from %s to %s", self.name, best_profit, new_solution_r.profit)
                             best_neighbor_solution = new_solution_r
                             best_profit = best_neighbor_solution.profit
 
                         else:
-                            logger.info("\t\t\t Did not improve the solution")
+                            logger.debug("\t\t\t Did not improve the solution")
 
-                        neighbors_a = self.get_candidates(order_a, new_solution_r)
+                        neighbors_a = self.get_feasible_schedules(order_a, new_solution_r)
 
                         if not neighbors_a:
-                            logger.info("\t\t\t Unable to reschedule removed order")
+                            logger.debug("\t\t\t Unable to reschedule removed order")
 
                         else:
 
@@ -69,12 +68,12 @@ class LocalSearch(BaseSolver):
 
                                 new_solution_a = copy.deepcopy(new_solution_r)
 
-                                new_solution_a = self.add_order_schedule(order_a, neighbor_a, new_solution_a)
+                                new_solution_a = self.add_schedule(order_a, neighbor_a, new_solution_a)
 
-                                logger.info("\t\t\t Reassigned order %s", order_a.id)
+                                logger.debug("\t\t\t Reassigned order %s", order_a.id)
 
                                 if new_solution_a.profit > best_profit:
-                                    logger.info("\t\t\t Improved solution from %s to %s", best_profit, new_solution_a.profit)
+                                    logger.info("\t [%s] Improved solution from %s to %s", self.name, best_profit, new_solution_a.profit)
                                     best_neighbor_solution = new_solution_a
                                     best_profit = best_neighbor_solution.profit
 
@@ -93,15 +92,18 @@ class LocalSearch(BaseSolver):
             neighbor = self.explore_neighborhood(best_solution, orders)
 
             if neighbor is None:
-                logger.info("[Local Search] No neighbors found")
+                logger.info("[%s] No neighbors found", self.name)
                 break;
 
             elif neighbor.profit < highest_profit:
-                logger.info("[Local Search] Neighbor found but the solution is not improved")
+                logger.info("[%s] Neighbor found but the solution is not improved", self.name)
                 break;
 
             highest_profit = neighbor.profit
             best_solution = neighbor
+
+        logger.info("[%s] Elapsed time: %s seconds", self.name, self.get_elapsed_time(start_time))
+        logger.info('[%s] Optimal profit: %s', self.name, best_solution.profit)
 
         return best_solution
 

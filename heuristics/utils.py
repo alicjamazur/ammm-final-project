@@ -1,3 +1,4 @@
+import copy
 from typing import List
 import sys
 import logging
@@ -59,7 +60,7 @@ class Input:
 @dataclass
 class Candidate:
     schedule: List[int]
-    q: int
+    cost: int
 
 
 @dataclass
@@ -70,6 +71,7 @@ class BaseSolver:
 
     def get_elapsed_time(self, start_time: float) -> float:
         return time.time() - start_time
+
     def get_orders(self):
 
         orders = []
@@ -87,7 +89,7 @@ class BaseSolver:
 
         return orders
 
-    def add_order_schedule(self, order: Order, schedule: OrderSchedule, solution: Solution) -> Solution:
+    def add_schedule(self, order: Order, schedule: OrderSchedule, solution: Solution) -> Solution:
 
         solution.profit += order.profit
         solution.taken_orders[order.id] = True
@@ -114,14 +116,35 @@ class BaseSolver:
 
         return solution
 
-    def get_candidates(self, order: Order, partial_solution: Solution) -> List[OrderSchedule]:
+    def evaluate_schedules(self, order: Order, schedules: List[OrderSchedule], solution: Solution) -> List[Candidate]:
+
+        candidates = []
+
+        for schedule in schedules:
+
+            potential_solution = copy.deepcopy(solution)
+
+            potential_solution = self.add_schedule(order, schedule, potential_solution)
+
+            occupied_surface = [self.input_data.surface_capacity - slot.free_surface for slot in potential_solution.occupation]
+
+            # minimize the average time slot occupation
+            cost = int(sum(occupied_surface) / len(occupied_surface))
+
+            candidate = Candidate(schedule, cost)
+
+            candidates.append(candidate)
+
+        return candidates
+
+    def get_feasible_schedules(self, order: Order, partial_solution: Solution) -> List[OrderSchedule]:
 
         slots = partial_solution.occupation
 
         # logger.info("Order index: %s', order reqs: %s, slots availability: %s", order.id, order, slots)
         schedule_length = len(partial_solution.schedule[0])
 
-        candidates = []
+        feasible_schedules = []
 
         for delivery_id in range(order.min_delivery, order.max_delivery + 1):
 
@@ -143,7 +166,7 @@ class BaseSolver:
                 if start_idx >= 0:
                     order_schedule = [True if start_idx <= i <= end_idx else False for i in range(schedule_length)]
 
-                    candidates.append(order_schedule)
+                    feasible_schedules.append(order_schedule)
 
-        return candidates
+        return feasible_schedules
 

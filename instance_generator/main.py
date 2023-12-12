@@ -1,7 +1,6 @@
 import sys
 from utils.input_parser import DATParser
 from utils.AMMMGlobals import AMMMException
-# from InstanceGeneratorP2.ValidateConfig import ValidateConfig
 from generator import InstanceGenerator
 
 
@@ -12,7 +11,6 @@ def run():
         print("-----------------------")
         print("Reading Config file %s..." % config_file)
         config = DATParser.parse(config_file)
-        # ValidateConfig.validate(config)
         print("Creating Instances...")
         generator = InstanceGenerator(config)
         generator.generate()

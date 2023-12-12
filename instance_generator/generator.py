@@ -65,7 +65,6 @@ class InstanceGenerator:
             f_instance.write('n=%d;\n' % numOrders)
             f_instance.write('t=%d;\n' % numSlots)
 
-            # translate vector of ints into vector of strings and concatenate that strings separating them by a single space character
             f_instance.write('profit=[%s];\n' % (' '.join(map(str, profit))))
             f_instance.write('length=[%s];\n' % (' '.join(map(str, length))))
             f_instance.write('min_deliver=[%s];\n' % (' '.join(map(str, min_deliver))))

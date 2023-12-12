@@ -128,8 +128,8 @@ class BaseSolver:
 
             occupied_surface = [self.input_data.surface_capacity - slot.free_surface for slot in potential_solution.occupation]
 
-            # minimize the average time slot occupation
-            cost = int(sum(occupied_surface) / len(occupied_surface))
+            # minimize time slot used capacity
+            cost = max(occupied_surface)
 
             candidate = Candidate(schedule, cost)
 

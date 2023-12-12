@@ -25,7 +25,7 @@ class LocalSearch(BaseSolver):
 
             order_r = orders[idx_r]
 
-            logger.info("\t [%s] Attempting to schedule rejected order %s", self.name, order_r.id)
+            logger.debug("\t [%s] Attempting to schedule rejected order %s", self.name, order_r.id)
 
             for idx_a in accepted_orders_idx:
 
@@ -50,7 +50,7 @@ class LocalSearch(BaseSolver):
                         logger.debug("\t\t Scheduled rejected order %s (candidate %s)", order_r.id, i+1)
 
                         if new_solution_r.profit > best_profit:
-                            logger.info("\t\t\t [%s] Improved solution from %s to %s", self.name, best_profit, new_solution_r.profit)
+                            logger.debug("\t\t\t [%s] Improved solution from %s to %s", self.name, best_profit, new_solution_r.profit)
                             best_neighbor_solution = new_solution_r
                             best_profit = best_neighbor_solution.profit
 
@@ -73,7 +73,7 @@ class LocalSearch(BaseSolver):
                                 logger.debug("\t\t\t Reassigned order %s", order_a.id)
 
                                 if new_solution_a.profit > best_profit:
-                                    logger.info("\t [%s] Improved solution from %s to %s", self.name, best_profit, new_solution_a.profit)
+                                    logger.debug("\t [%s] Improved solution from %s to %s", self.name, best_profit, new_solution_a.profit)
                                     best_neighbor_solution = new_solution_a
                                     best_profit = best_neighbor_solution.profit
 
@@ -92,18 +92,18 @@ class LocalSearch(BaseSolver):
             neighbor = self.explore_neighborhood(best_solution, orders)
 
             if neighbor is None:
-                logger.info("[%s] No neighbors found", self.name)
+                logger.debug("[%s] No neighbors found", self.name)
                 break;
 
             elif neighbor.profit < highest_profit:
-                logger.info("[%s] Neighbor found but the solution is not improved", self.name)
+                logger.debug("[%s] Neighbor found but the solution is not improved", self.name)
                 break;
 
             highest_profit = neighbor.profit
             best_solution = neighbor
 
-        logger.info("[%s] Elapsed time: %s seconds", self.name, self.get_elapsed_time(start_time))
-        logger.info('[%s] Optimal profit: %s', self.name, best_solution.profit)
+            logger.info("[%s] Objective: %s. Elapsed time: %s", self.name, best_solution.profit,
+                        self.get_elapsed_time(start_time))
 
         return best_solution
 

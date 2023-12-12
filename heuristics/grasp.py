@@ -28,6 +28,7 @@ class GRASP(BaseSolver):
         q_threshold = q_min + (q_max - q_min) * alpha
 
         logger.debug("q_min: %s, q_max: %s, q_threshold: %s", q_min, q_max, q_threshold)
+        logger.debug("candidates with cost: %s", sorted_candidates)
 
         max_index = 0
         for candidate in sorted_candidates:
@@ -41,7 +42,7 @@ class GRASP(BaseSolver):
 
         selection = random.choice(rcl)
 
-        logger.debug("\t alpha: %s, rcl: %s, selection: %s", alpha, rcl, selection.cost)
+        logger.debug("\t alpha: %s, rcl: %s/%s, selection: %s", alpha, len(rcl), len(sorted_candidates), selection.cost)
 
         return selection.schedule
 
@@ -82,8 +83,8 @@ class GRASP(BaseSolver):
 
         rejected_orders = sum(not v for v in solution.taken_orders)
 
-        logger.info("\t [Randomized Greedy] Best profit: %s", solution.profit)
-        logger.info("\t [Randomized Greedy] Rejected orders: %s", rejected_orders)
+        logger.debug("\t [Randomized Greedy] Best profit: %s", solution.profit)
+        logger.debug("\t [Randomized Greedy] Rejected orders: %s", rejected_orders)
 
         return solution
 
@@ -99,14 +100,14 @@ class GRASP(BaseSolver):
                 self.get_elapsed_time(start_time) < self.config.maxExecTime:
 
             iteration += 1
-            logger.info("[%s] Iteration %s", self.name, iteration)
+            logger.debug("[%s] Iteration %s", self.name, iteration)
 
             alpha = 0 if iteration == 1 else self.config.alpha
 
             base_solution = self.solve_randomized_greedy(alpha)
 
             if alpha == 0:
-                greedy_solution = base_solution
+                logger.info("[Greedy] Objective: %s. Elapsed time: %s", base_solution.profit, self.get_elapsed_time(start_time))
 
             rejected_orders = False in base_solution.taken_orders
 
@@ -116,9 +117,9 @@ class GRASP(BaseSolver):
             elif base_solution.profit > best_solution.profit:
                 best_solution = base_solution
 
-            if rejected_orders and self.config.localSearch:
+                logger.info("[%s] Objective: %s. Elapsed time: %s", self.name, best_solution.profit, self.get_elapsed_time(start_time))
 
-                logger.info("\t [Local Search] Attempting to improve the solution")
+            if rejected_orders and self.config.localSearch:
 
                 local_search = LocalSearch(self.input_data, self.config)
 
@@ -129,13 +130,12 @@ class GRASP(BaseSolver):
 
                 rejected_orders = False in ls_solution.taken_orders
 
-                logger.debug("\t [Local Search] Elapsed time: %s seconds", time.time() - start_time)
-                logger.info('\t [Local Search] Best profit: %s', ls_solution.profit)
+                # logger.debug("\t [Local Search] Elapsed time: %s seconds", time.time() - start_time)
+                # logger.info('\t [Local Search] Best profit: %s', ls_solution.profit)
 
                 if ls_solution.profit > best_solution.profit:
                     best_solution = ls_solution
 
-        logger.info("[Greedy] Objective: %s", greedy_solution.profit)
         logger.info("[%s] Best objective after %s iterations: %s", self.name, iteration, best_solution.profit)
 
         return best_solution

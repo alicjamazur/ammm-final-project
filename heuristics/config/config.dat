@@ -1,10 +1,10 @@
 # --- Common specific parameters ------------------------------------------------------------------------------
-inputDataFile        = data/l_tuning_1.dat;        # Input DAT file
-solver               = Greedy;                  # Supported solvers: Greedy / GRASP
-maxExecTime          = 60;                      # Maximum execution time in seconds
+inputDataFile        = data/s_0.dat;        # Input DAT file
+solver               = GRASP;                  # Supported solvers: Greedy / GRASP
+maxExecTime          = 10;                      # Maximum execution time in seconds
 
 # --- Local Search specific parameters ------------------------------------------------------------------------
 localSearch          = True;                # Enable local search?
 
 # --- GRASP constructive specific parameters ------------------------------------------------------------------
-alpha                = 0.3;                # Alpha parameter for the GRASP solver.
+alpha                = 0.1;                # Alpha parameter for the GRASP solver.
